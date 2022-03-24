@@ -3,7 +3,7 @@
 
 <h2>1. Data</h2>
 Most of our assigned parameter values and calibration targets are taken directly from the literature. There are a few, however, that we constructed ourselves from several data sources.
-<br>
+<br/>
 
 **Labor productivity process.** We model our idiosyncratic labor productivity process after GKKOC. Their process has two parts: a fixed effect that is constant over an individual's life and transmitted according to an AR(1) process in logs across generations; and a persistent shock that evolves according to an AR(1) process in logs over an individual's life but is not transmitted across generations. Our process is simpler: we have one component that follows one AR(1) process over an individual's life and follows a different AR(1) process across generations. To set the parameters of our process, we simulate data from \citet{gkkoc}'s process and estimate the parameters of our process on that data. Specifically, we first simulate the two GKKOC processes. We then estimate our own process on this simulated data.
 
@@ -20,10 +20,11 @@ The model described is solved using a set of computer programs written in C. The
 
   <h3>Programs and system requirements</h3>
 There are two main programs: model and optpol. Both programs write output in the form of CSV files. There is one file per equilibrium. The first line contains variable names (e.g. Y for GDP, WtaxRev_lost for wealth tax revenues lost to evasion...). Each row contains the values for a given period. A stationary equilibrium output file has one line. A transition has many lines, one per period.
-<br>
+<br/>
 
 **model.** This program solves for the model's equilibrium (both in the long-run and transition dynamics) for a given set of parameters. It uses OpenMP to parallelize the solution of the household's problem and iteration of the distribution. It can be run by simply typing \texttt{./bin/model} from the command line. This program has many command-line options that allow the user to run the baseline and no-evasion counterfactuals, various sensitivity analyses, and transition dynamics. To see all the options, run \texttt{./bin/model --help}. Note that this program can be run in principle on any computer, but it requires a large amount of memory and lots of CPU cores to run in practice. We used a dual-CPU Xeon workstation with 40 cores and 92GB of RAM. It takes several hours to solve for a single equilibrium and at least a week to solve for a transition. The bash script \texttt{optimize.sh} in the main \texttt{c} folder contains the batch processing submission request we used.
 
   **optpol.** This program conducts a global search for the optimal progressive wealth tax using the differential evolution algorithm (https://en.wikipedia.org/wiki/Differential\_evolution). This algorithm is implemented using MPI to parallelize the solution of many steady states (associated with different tax parameters) simultaneously. This program still uses OpenMP to parallelize the household problem and distribution updating. In other words, it is a hybrid OpenMP-MPI approach. This program must be run on a supercomputer cluster such as the University of Toronto's Niagara system. We used 100 compute nodes (each with 40 cores) to run this program, assigning 4 MPI tasks to each node. Thus, each iteration of the optimization algorithm solves for 400 equilibria simultaneously. 
+<br/>
 
 To compile the programs, simply navigate to the \texttt{c} folder and type \texttt{make model} or \texttt{make optpol} in the command line. In addition to the standard C codebase, these programs require the GNU gcc compiler (https://gcc.gnu.org) or the Intel icc compiler (https://www.intel.com/content/www/us/en/develop/documentation/cpp-compiler-developer-guide-and-reference/top.html) the GNU GSL library (https://www.gnu.org/software/gsl), OpenMP (https://www.openmp.org), and OpenMPI (https://www.open-mpi.org). We used Ubuntu Linux 20.04 to compile and run the programs, and we cannot guarantee that these programs will work without modifications in Windows or other operating systems.
