@@ -1,7 +1,7 @@
-# tax-evasion
-### Code reposity for "Tax Evasion and Capital Taxation" by Shahar Rotberg and Joseph Steinberg ###
+#### tax-evasion
+# Code reposity for "Tax Evasion and Capital Taxation" by Shahar Rotberg and Joseph Steinberg #
 
-## Data ##
+# Data #
 Most of our assigned parameter values and calibration targets are taken directly from the literature. There are a few, however, that we constructed ourselves from several data sources.  
 <br/>
 **Labor productivity process.** We model our idiosyncratic labor productivity process after GKKOC. Their process has two parts: a fixed effect that is constant over an individual's life and transmitted according to an AR(1) process in logs across generations; and a persistent shock that evolves according to an AR(1) process in logs over an individual's life but is not transmitted across generations. Our process is simpler: we have one component that follows one AR(1) process over an individual's life and follows a different AR(1) process across generations. To set the parameters of our process, we simulate data from \citet{gkkoc}'s process and estimate the parameters of our process on that data. Specifically, we first simulate the two GKKOC processes. We then estimate our own process on this simulated data.
@@ -14,10 +14,10 @@ Most of our assigned parameter values and calibration targets are taken directly
 
 **Detection rate.** To obtain an estimate for the rate at which offshore evasion is detected, we multiply the audit rate for individuals in the top 0.1\% of the income distribution by the probability that an auditor correctly detects an unfulfilled requirement to report offshore wealth. Based on figure A7 in \citet{glrrz}, we calculate that the average audit rate for individuals in the top 0.1\% from 2009-2019 was 8.1\%. Furthermore, figure 4(a) in their study shows that auditors correctly detected unfulfilled requirements to report offshore wealth for 10 individuals out of the 135 individuals audited, which comes to a 7.4\% detection rate for individuals audited. Multiplying the former by the latter, gives us approximately a 0.6\% detection rate. We thank Daniel Reck, one of the authors of the aforementioned study, for suggesting this approach.
 
-## Code ##
+# Code #
 The model described is solved using a set of computer programs written in C. The code, along with the Python scripts used to process the program's output are contained in this repository. The source code is contained in the folder <a href="c/src">c/src</a>. The binary executables, which are created by compiling the program, are contained in the folder <a href="c/bin">c/bin</a>. The output of the program, which is created by running the executables, is contained in the folder <a href="c/output">c/output</a>. The makefiles used to create the executables, are contained in the top level of the <a href="c">c</a> folder. The scripts used to process the output are contained in the <a href="python">python</a> folder. The tables and figures shown in the paper and appendix are in the <a href="python/output">python/output</a> folder.
 
-# Programs and system requirements #
+## Programs and system requirements ##
 There are two main programs: `model` and `optpol`. Both programs write output in the form of CSV files. There is one file per equilibrium. The first line contains variable names (e.g. Y for GDP, WtaxRev_lost for wealth tax revenues lost to evasion...). Each row contains the values for a given period. A stationary equilibrium output file has one line. A transition has many lines, one per period.  
 <br/>
 <br/>
