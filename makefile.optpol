@@ -1,0 +1,20 @@
+CC = mpicc
+CFLAGS = -Wall -pedantic -O3 -qopenmp -mcmodel=medium -DHAVE_INLINE=1 -ffast-math
+LDFLAGS = -lgsl -lgslcblas -lm -ldl -DHAVE_INLINE=1 -ffast-math
+EXDIR = bin
+ODIR = src/obj
+
+_OBJ = diff_evo_mpi.o externs.o eqm.o calibration.o diff_evo_utils.o
+OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+
+$(ODIR)/%.o: src/%.c $(DEPS)
+	     $(CC) -c -o $@ $< $(CFLAGS)
+
+optimize: $(OBJ)
+	  $(CC) -o $(EXDIR)/$@ $^ $(CFLAGS) $(LDFLAGS)
+
+.PHONY: clean
+
+clean:
+	rm -f $(ODIR)/*.o
+	rm -f $(EXDIR)/*

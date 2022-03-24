@@ -1,0 +1,15 @@
+CC = icc
+CFLAGS = -Wall -pedantic -qopenmp -mcmodel=medium -DHAVE_INLINE=1 -ffast-math -O3
+LDFLAGS = -lgsl -lgslcblas -lm -ldl -DHAVE_INLINE=1 -ffast-math -O3
+
+EXDIR = bin
+ODIR = src/obj
+
+_OBJ = main.o eqm.o calibration.o
+OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+
+$(ODIR)/%.o: src/%.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+model: $(OBJ)
+	$(CC) -o $(EXDIR)/$@ $^ $(CFLAGS) $(LDFLAGS)
