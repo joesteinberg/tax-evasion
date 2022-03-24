@@ -3,8 +3,8 @@
 
 <h2>1. Data</h2>
 Most of our assigned parameter values and calibration targets are taken directly from the literature. There are a few, however, that we constructed ourselves from several data sources.  
-  
-  
+&nbsp;
+&nbsp;
 **Labor productivity process.** We model our idiosyncratic labor productivity process after GKKOC. Their process has two parts: a fixed effect that is constant over an individual's life and transmitted according to an AR(1) process in logs across generations; and a persistent shock that evolves according to an AR(1) process in logs over an individual's life but is not transmitted across generations. Our process is simpler: we have one component that follows one AR(1) process over an individual's life and follows a different AR(1) process across generations. To set the parameters of our process, we simulate data from \citet{gkkoc}'s process and estimate the parameters of our process on that data. Specifically, we first simulate the two GKKOC processes. We then estimate our own process on this simulated data.
 
 **Entrepreneurial opportunity process.** We use the 2016 wave of the Survey of Consumer Finances (SCF) to calculate (i) the fraction of all working-age households with strictly positive business or farm income, and (ii) the fraction of households at age 25 with strictly positive business or farm income. We set the probability of having an entrepreneurial opportunity at birth, $p_0$, to (i). Given our assignment of the probability of losing an entrepreneurial opportunity, $p_1$, we then set the probability of regaining an entrepreneurial opportunity, $p_2$, so that the model is consistent with (ii).
