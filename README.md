@@ -23,6 +23,38 @@ There are two main programs: `model` and `optpol`. Both programs write output in
 **model.** This program solves for the model's equilibrium (both in the long-run and transition dynamics) for a given set of parameters. It uses OpenMP to parallelize the solution of the household's problem and iteration of the distribution. It can be run by simply typing ./bin/model from the command line. This program has many command-line options that allow the user to run the baseline and no-evasion counterfactuals, various sensitivity analyses, and transition dynamics. To see all the options, run ./bin/model --help. Note that this program can be run in principle on any computer, but it requires a large amount of memory and lots of CPU cores to run in practice. We used a dual-CPU Xeon workstation with 40 cores and 92GB of RAM. It takes several hours to solve for a single equilibrium and at least a week to solve for a transition. The bash script optimize.sh in the main <a href="c">c</a> folder contains the batch processing submission request we used.
 
 
-  **optpol.** This program conducts a global search for the optimal progressive wealth tax using the differential evolution algorithm (https://en.wikipedia.org/wiki/Differential\_evolution). This algorithm is implemented using MPI to parallelize the solution of many steady states (associated with different tax parameters) simultaneously. This program still uses OpenMP to parallelize the household problem and distribution updating. In other words, it is a hybrid OpenMP-MPI approach. This program must be run on a supercomputer cluster such as the University of Toronto's Niagara system. We used 100 compute nodes (each with 40 cores) to run this program, assigning 4 MPI tasks to each node. Thus, each iteration of the optimization algorithm solves for 400 equilibria simultaneously.  
+  **optpol.** This program conducts a global search for the optimal progressive wealth tax using the differential evolution algorithm (https://en.wikipedia.org/wiki/Differential_evolution). This algorithm is implemented using MPI to parallelize the solution of many steady states (associated with different tax parameters) simultaneously. This program still uses OpenMP to parallelize the household problem and distribution updating. In other words, it is a hybrid OpenMP-MPI approach. This program must be run on a supercomputer cluster such as the University of Toronto's Niagara system. We used 100 compute nodes (each with 40 cores) to run this program, assigning 4 MPI tasks to each node. Thus, each iteration of the optimization algorithm solves for 400 equilibria simultaneously.  
   
 To compile the programs, simply navigate to the <a href="c">c</a> folder and type `make model` or `make optpol` in the command line. In addition to the standard C codebase, these programs require the GNU gcc compiler (https://gcc.gnu.org) or the Intel icc compiler (https://www.intel.com/content/www/us/en/develop/documentation/cpp-compiler-developer-guide-and-reference/top.html) the GNU GSL library (https://www.gnu.org/software/gsl), OpenMP (https://www.openmp.org), and OpenMPI (https://www.open-mpi.org). We used Ubuntu Linux 20.04 to compile and run the programs, and we cannot guarantee that these programs will work without modifications in Windows or other operating systems.
+
+## Source code ##
+The source code is broken down into several files.
+
+**calibration.c, calibration.h.** This header and source file contain all of the declarations and assignments of the model's parameters, along with several small utility routines.
+
+**eqm.c, eqm.h.** This header and source file contain the code to solve the household's problem, update the distribution, solve for a long-run equilibrium, and solve the transition dynamics given a set of parameter values.
+
+**main.c.** This file contains the \texttt{main} routine for the program `model`
+
+**diff_evo_mpi.c, diff_evo_utils.c, diff_evo_utils.h, externs.c.** These files contain the code the for MPI implementation of the differential evolution global optimization algorithm in the program `optpol`
+
+## Processing scripts ##
+In addition to the program's source code, we use several Python scripts to create the tables and figures shown in the paper and appendix.
+
+**tables_figs_main.py.** This script creates table 4 and figures 1-2, which show the main long-run results.
+
+**table_dist.py.** This script creates table 3, which shows how welfare consequences of capital taxes are distributed.
+
+**tables_figs_trans.py** This script creates figure 6 and table 7, which show transition dynamics.
+
+**table_figs_sens.py** This script creates table 6 and figure D.1, which show the results of the sensitivity analyses we discuss in the main text, as well as versions of the model where detection revenues do not enter the government's budget constraint and hidden wealth cannot be collateralized.
+
+**figs_chi0.py.** This script creates figures D.2-D.3, which show the effects of capital income and wealth taxes when hidden wealth cannot be collateralized
+
+**figs_taul.py.** This script creates figures D.4-D.5, which show the effects of capital income and wealth taxes when additional revenues are used to reduce labor income taxes.
+
+**figs_soe.py.** This script creates figures D.6-D.7, which show the results in our small-open-economy sensitivity analysis.
+
+**figs_noconst.py.** This script creates figures D.8-D.9, which show the results in our sensitivity analysis in which there is no external financing constraint.
+
+**figs_heterobeta.py** This script creates figures D.10-D.11, which show the results in our sensitivity analysis in which there are heterogeneous discount factors.
