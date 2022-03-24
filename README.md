@@ -2,7 +2,7 @@
 <h1>Code reposity for "Tax Evasion and Capital Taxation" by Shahar Rotberg and Joseph Steinberg</h1>
 
 <h2>1. Data</h2>
-Most of our assigned parameter values and calibration targets are taken directly from the literature. There are a few, however, that we constructed ourselves from several data sources.
+Most of our assigned parameter values and calibration targets are taken directly from the literature. There are a few, however, that we constructed ourselves from several data sources.\
 \
 \
 **Labor productivity process.** We model our idiosyncratic labor productivity process after GKKOC. Their process has two parts: a fixed effect that is constant over an individual's life and transmitted according to an AR(1) process in logs across generations; and a persistent shock that evolves according to an AR(1) process in logs over an individual's life but is not transmitted across generations. Our process is simpler: we have one component that follows one AR(1) process over an individual's life and follows a different AR(1) process across generations. To set the parameters of our process, we simulate data from \citet{gkkoc}'s process and estimate the parameters of our process on that data. Specifically, we first simulate the two GKKOC processes. We then estimate our own process on this simulated data.
