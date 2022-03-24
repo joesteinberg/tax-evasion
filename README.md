@@ -3,7 +3,7 @@
 
 <h2>1. Data</h2>
 Most of our assigned parameter values and calibration targets are taken directly from the literature. There are a few, however, that we constructed ourselves from several data sources.
-
+<br>
 
 **Labor productivity process.** We model our idiosyncratic labor productivity process after GKKOC. Their process has two parts: a fixed effect that is constant over an individual's life and transmitted according to an AR(1) process in logs across generations; and a persistent shock that evolves according to an AR(1) process in logs over an individual's life but is not transmitted across generations. Our process is simpler: we have one component that follows one AR(1) process over an individual's life and follows a different AR(1) process across generations. To set the parameters of our process, we simulate data from \citet{gkkoc}'s process and estimate the parameters of our process on that data. Specifically, we first simulate the two GKKOC processes. We then estimate our own process on this simulated data.
 
@@ -20,7 +20,7 @@ The model described is solved using a set of computer programs written in C. The
 
   <h3>Programs and system requirements</h3>
 There are two main programs: model and optpol. Both programs write output in the form of CSV files. There is one file per equilibrium. The first line contains variable names (e.g. Y for GDP, WtaxRev_lost for wealth tax revenues lost to evasion...). Each row contains the values for a given period. A stationary equilibrium output file has one line. A transition has many lines, one per period.
-
+<br>
 
 **model.** This program solves for the model's equilibrium (both in the long-run and transition dynamics) for a given set of parameters. It uses OpenMP to parallelize the solution of the household's problem and iteration of the distribution. It can be run by simply typing \texttt{./bin/model} from the command line. This program has many command-line options that allow the user to run the baseline and no-evasion counterfactuals, various sensitivity analyses, and transition dynamics. To see all the options, run \texttt{./bin/model --help}. Note that this program can be run in principle on any computer, but it requires a large amount of memory and lots of CPU cores to run in practice. We used a dual-CPU Xeon workstation with 40 cores and 92GB of RAM. It takes several hours to solve for a single equilibrium and at least a week to solve for a transition. The bash script \texttt{optimize.sh} in the main \texttt{c} folder contains the batch processing submission request we used.
 
