@@ -33,7 +33,7 @@ The source code is broken down into several files.
 
 **eqm.c, eqm.h.** This header and source file contain the code to solve the household's problem, update the distribution, solve for a long-run equilibrium, and solve the transition dynamics given a set of parameter values.
 
-**main.c.** This file contains the \texttt{main} routine for the program `model`
+**main.c.** This file contains the `main(int argc, char * argv)` function for the program `model`
 
 **diff_evo_mpi.c, diff_evo_utils.c, diff_evo_utils.h, externs.c.** These files contain the code the for MPI implementation of the differential evolution global optimization algorithm in the program `optpol`
 
