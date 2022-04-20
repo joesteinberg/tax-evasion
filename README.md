@@ -55,5 +55,3 @@ In addition to the program's source code, we use several Python scripts to creat
 **figs_soe.py.** This script creates figures D.6-D.7, which show the results in our small-open-economy sensitivity analysis.
 
 **figs_noconst.py.** This script creates figures D.8-D.9, which show the results in our sensitivity analysis in which there is no external financing constraint.
-
-**figs_heterobeta.py** This script creates figures D.10-D.11, which show the results in our sensitivity analysis in which there are heterogeneous discount factors.
