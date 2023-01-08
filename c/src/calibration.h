@@ -24,150 +24,153 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_roots.h>
 
+#define J 61 // lifespan
+#define R 41 // retirement age
+#define NE 5 // number of employment shocks
+#define NZ 7 // number of persistent ability states
+#define NI 2 // number of entrepreneurial shocks
+#define NA 200
+#define NV 12
+#define ND 2
+
+#ifdef _OPENMP
+#define NTH 61
+#else
+#define NTH 1
+#endif
+
+#define FINE_GRID_SIZE 51
+#define NQUANTILES 6
+#define NT 100
 
 /****************************************************************/
 /*    Declaration of constants and parameters                   */
 /****************************************************************/
 
-int sens_type;
-int benchmark_eqm; // flag indicating we are solving benchmark, and hence need to store some additional stuff
-int taua_clear_gbc;
-int taul_clear_gbc;
-int wealth_tax_type;
-int public_goods;
-int lump_sum;
-int constraint_flag;
-int detection_revenue_flag;
-int taul_flag;
+#ifndef EXTERN
+#define EXTERN extern
+#endif
+
+EXTERN int sens_type;
+EXTERN int benchmark_eqm; // flag indicating we are solving benchmark, and hence need to store some additional stuff
+EXTERN int taua_clear_gbc;
+EXTERN int taul_clear_gbc;
+EXTERN int wealth_tax_type;
+EXTERN int public_goods;
+EXTERN int lump_sum;
+EXTERN int constraint_flag;
+EXTERN int detection_revenue_flag;
+EXTERN int taul_flag;
 
 // preferences
-double sigma; // risk aversion/IES
-double beta; // discount factor
-double gama; // consumption share in utility
-double sigma2; // frisch
+EXTERN double sigma; // risk aversion/IES
+EXTERN double beta; // discount factor
+EXTERN double gama; // consumption share in utility
+EXTERN double sigma2; // frisch
 
 // OLG stuff 
-#define J 61 // lifespan
-#define R 41 // retirement age
-double phi[J]; // survival probabilities
-double zeta[J]; // deterministic income growth
+EXTERN double phi[J]; // survival probabilities
+EXTERN double zeta[J]; // deterministic income growth
 
 // employment states
-#define NE 5 // number of employment shocks
-double rho1_e; // LF persistence
-double sig1_e; // LF dispersion
-double rho2_e; // LF persistence
-double sig2_e; // LF dispersion
-double e_grid[NE]; // state grid
-double e_ergodic_dist[NE]; // ergodic distribution
-double e_ergodic_dist_cum[NE]; // ergodic distribution
-double e_birth_probs[NE][NE]; // transition matrix
-double e_birth_probs_cum[NE][NE]; // transition matrix
-double e_probs[NE][NE]; // transition matrix
-double e_probs_cum[NE][NE]; // transition matrix
+EXTERN double rho1_e; // LF persistence
+EXTERN double sig1_e; // LF dispersion
+EXTERN double rho2_e; // LF persistence
+EXTERN double sig2_e; // LF dispersion
+EXTERN double e_grid[NE]; // state grid
+EXTERN double e_ergodic_dist[NE]; // ergodic distribution
+EXTERN double e_ergodic_dist_cum[NE]; // ergodic distribution
+EXTERN double e_birth_probs[NE][NE]; // transition matrix
+EXTERN double e_birth_probs_cum[NE][NE]; // transition matrix
+EXTERN double e_probs[NE][NE]; // transition matrix
+EXTERN double e_probs_cum[NE][NE]; // transition matrix
 
 // entrepreneurial ability states
-#define NZ 7 // number of persistent ability states
-#define NI 2 // number of entrepreneurial shocks
-double rho_z; // IG persistence
-double sig_z; // IG dispersion
-double z_grid[NZ]; // persistent state grid
-double z_ergodic_dist[NZ]; // ergodic distribution
-double z_ergodic_dist_cum[NZ]; // ergodic distribution
-double z_probs[NZ][NZ]; // inheritance transition matrix
-double z_probs_cum[NZ][NZ]; // inheritance transition matrix
-double pi;
-double i_probs[NI][NI]; // shock transition probabilities
-double i_probs_cum[NI][NI]; // shock transition probabilities
+EXTERN double rho_z; // IG persistence
+EXTERN double sig_z; // IG dispersion
+EXTERN double z_grid[NZ]; // persistent state grid
+EXTERN double z_ergodic_dist[NZ]; // ergodic distribution
+EXTERN double z_ergodic_dist_cum[NZ]; // ergodic distribution
+EXTERN double z_probs[NZ][NZ]; // inheritance transition matrix
+EXTERN double z_probs_cum[NZ][NZ]; // inheritance transition matrix
+EXTERN double pi;
+EXTERN double i_probs[NI][NI]; // shock transition probabilities
+EXTERN double i_probs_cum[NI][NI]; // shock transition probabilities
 
 // financial markets
-#define NA 200
-double lambda;
-double lambda2;
-double delta;
+EXTERN double lambda;
+EXTERN double lambda2;
+EXTERN double delta;
 
 // production
-double alpha; // capital share
-double alpha2; // corporate capital share
-double nu; // elasticity of substitution
+EXTERN double alpha; // capital share
+EXTERN double alpha2; // corporate capital share
+EXTERN double nu; // elasticity of substitution
 
 // taxes
-double tauc; // consumption tax
-double tauk; // capital income tax
-double tauk2; // capital income tax
-double g; // gov't spending
-double taul_bar;
-double taul[NE]; // labor income tax
-double Phi[NE]; // SS benefits
-double M50_threshold;
-double taua;
-double abar;
-double abar2;
-double kbar;
+EXTERN double tauc; // consumption tax
+EXTERN double tauk; // capital income tax
+EXTERN double tauk2; // capital income tax
+EXTERN double g; // gov't spending
+EXTERN double taul_bar;
+EXTERN double taul[NE]; // labor income tax
+EXTERN double Phi[NE]; // SS benefits
+EXTERN double M50_threshold;
+EXTERN double taua;
+EXTERN double abar;
+EXTERN double abar2;
+EXTERN double kbar;
 
 // evasion
-int evasion_type;
-double theta;
-double eta;
-double eta2;
-double chi;
-double p1n;
-double p1e;
-double p2n;
-double p2e;
-double penalty_frac_stock;
-double penalty_frac_tauk;
-double penalty_frac_taua;
-int max_penalty_years;
-#define NV 1
-#define ND 1
-double evasion_grid[NV];
+EXTERN int evasion_type;
+EXTERN double theta;
+EXTERN double eta;
+EXTERN double eta2;
+EXTERN double chi;
+EXTERN double p1n;
+EXTERN double p1e;
+EXTERN double p2n;
+EXTERN double p2e;
+EXTERN double penalty_frac_stock;
+EXTERN double penalty_frac_tauk;
+EXTERN double penalty_frac_taua;
+EXTERN int max_penalty_years;
+EXTERN double evasion_grid[NV];
 
 // computational stuff
-#ifdef _OPENMP
-#define NTH 20
-#else
-#define NTH 1
-#endif
-double asset_grid_ub_mult;
-double asset_grid_exp;
-double root_tol_abs;
-double root_tol_rel;
-int max_root_iter;
-double fmin_xtol_abs;
-double fmin_xtol_rel;
-double fmin_ftol_abs;
-double fmin_ftol_rel;
-int fmin_max_iter;
-double vf_tol_abs;
-double vf_tol_rel;
-int vf_max_iter;
-double bound_mult;
-double dist_tol;
-int dist_max_iter;
-int wage_max_iter;
-double wage_tol;
-int max_trans_iter;
-#define FINE_GRID_SIZE 51
-#define NQUANTILES 6
-double quantiles[NQUANTILES];
-int verbose;
-int exploit_monotonicity;
-char fname0[128];
-char pref1[128];
-char csv[128];
-int write_binary;
-FILE * logfile;
-#define NT 100
-
-/****************************************************************/
-/*    Declaration of calibration-related functions              */
-/****************************************************************/
-void set_params(int evasion_type_);
+EXTERN double asset_grid_ub_mult;
+EXTERN double asset_grid_exp;
+EXTERN double root_tol_abs;
+EXTERN double root_tol_rel;
+EXTERN int max_root_iter;
+EXTERN double fmin_xtol_abs;
+EXTERN double fmin_xtol_rel;
+EXTERN double fmin_ftol_abs;
+EXTERN double fmin_ftol_rel;
+EXTERN int fmin_max_iter;
+EXTERN double vf_tol_abs;
+EXTERN double vf_tol_rel;
+EXTERN int vf_max_iter;
+EXTERN double bound_mult;
+EXTERN double dist_tol;
+EXTERN int dist_max_iter;
+EXTERN int wage_max_iter;
+EXTERN double wage_tol;
+EXTERN int max_trans_iter;
+EXTERN double quantiles[NQUANTILES];
+EXTERN int verbose;
+EXTERN int exploit_monotonicity;
+EXTERN char fname0[128];
+EXTERN char pref1[128];
+EXTERN char csv[128];
+EXTERN int write_binary;
+EXTERN FILE * logfile;
 
 /****************************************************************/
 /*    Simple helper functions                                   */
 /****************************************************************/
+
+void set_params(int evasion_type_);
 
 static inline void open_log(int lognum)
 {
@@ -329,9 +332,5 @@ static inline double dot_prod(const double * v1, const double * v2, int n)
   return sum;
 }
 #define DOT_PROD(v1,v2,n) (dot_prod( (double *)(v1), (double *)(v2), (n) ))
-
-// linear interpolation
-double interp(gsl_interp_accel * acc, const double *xa, const double *ya, int n, double x);
-
 
 #endif

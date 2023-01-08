@@ -27,9 +27,11 @@ easy to read.
 #endif
 
 #define MAXPOP 500
-#define RESTART_POP_FROM_FILE 0
+//#define RESTART_POP_FROM_FILE 0
 #define MAXDIM 35
 #define EPS 1.0e-8
+
+int read_pop_from_file;
 
 //////////////////////////////////////////////////////////////////////////
 // function definitions

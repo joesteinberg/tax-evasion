@@ -24,7 +24,7 @@ double c[MAXPOP][MAXDIM], d[MAXPOP][MAXDIM];
 double (*pold)[MAXPOP][MAXDIM], (*pnew)[MAXPOP][MAXDIM], (*pswap)[MAXPOP][MAXDIM];
 
 //extern void load_eqm();
-extern void setup();
+extern void setup(int evasion_flag, int evasion_elast_flag);
 extern void cleanup();
 double extern cal_obj_fun(int dim, double member[]); /* obj. funct. */
 void evolve(int strategy, int npop, int dim, double F, double CR, const double bestit[], double tmp[][MAXDIM]);
@@ -112,7 +112,8 @@ int main(int argc, char *argv[])
   char processor_name[MPI_MAX_PROCESSOR_NAME];
   int provided;
   int namelen;
-
+  int nt=1, it=0;
+  int evasion_flag=0, evasion_elast_flag=0;
 
   // initialize MPI ----------------------------------------------------
   err = MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
@@ -167,25 +168,40 @@ int main(int argc, char *argv[])
       return 1;
     }
 
-  if(strcmp(argv[1],"0")==0 && NV==1 && ND==1)
+  if(strcmp(argv[1],"0")==0)
     {
-      evasion_type=0;
-      sens_type=0;
+      evasion_elast=0.0;
     }
-  else if(strcmp(argv[1],"1")==0 && NV==12 && ND==2)
+  else if(strcmp(argv[1],"1")==0)
     {
-      evasion_type=1;
-      sens_type = atoi(argv[2]);
-
-      if(sens_type<0 || sens_type>4)
+      evasion_elast=0.5;
+    }
+  else if(strcmp(argv[1],"2")==0)
+    {
+      evasion_elast=2.5;
+    }
+  else if(strcmp(argv[1],"3")==0)
+    {
+      evasion_elast=7.5;
+    }
+  else
+    {
+      if(id==0)
 	{
-	  if(id==0)
-	    {
-	      help();
-	    }
-	  MPI_Finalize();
-	  return 1;
+	  help();
 	}
+      help();
+      MPI_Finalize();
+      return 1;
+    }
+
+  if(strcmp(argv[2],"0")==0)
+    {
+      read_pop_from_file=0;
+    }
+  else if(strcmp(argv[2],"1")==0)
+    {
+      read_pop_from_file=1;
     }
   else
     {
@@ -197,7 +213,6 @@ int main(int argc, char *argv[])
       return 1;
     }
 
-  // open log file
   if(id==0)
     {
       logfile = stdout;
@@ -210,33 +225,17 @@ int main(int argc, char *argv[])
   fprintf(logfile,"\n\n");
   fprintf(logfile,"Wealth tax optimization program (hybrid MPI-OpenMP parallelization)\n");
   fprintf(logfile,"Joseph Steinberg, University of Toronto\n\n");
-  fprintf(logfile,"Scenario:\n");
-
-  if(evasion_type==0)
+  fprintf(logfile,"Evasion elasticity: %0.2f\n",evasion_elast);
+  if(read_pop_from_file)
     {
-      fprintf(logfile,"\tNo evasion\n");
+      fprintf(logfile,"Restarting population from saved output from previous run\n");
     }
-  else if(evasion_type==1)
+  else
     {
-      fprintf(logfile,"\tEvasion: ");
-
-      if(sens_type==0)
-	fprintf(logfile,"Baseline model\n");
-      else if(sens_type==1)
-	fprintf(logfile,"Higher transfer costs\n");
-      else if(sens_type==2)
-	fprintf(logfile,"Higher detection rate\n");
-      else if(sens_type==3)
-	fprintf(logfile,"Higher detection penalty\n");
-      else if(sens_type==4)
-	fprintf(logfile,"No detection revenues\n");
-
+      fprintf(logfile,"Initializing fresh population\n");
     }
-
-  fprintf(logfile,"\nMPI process number %d\n",id);
-  
-  omp_set_num_threads(NTH);
-  fprintf(logfile,"OpenMP parallel processing with %d threads\n",omp_get_max_threads());
+  fprintf(logfile,"\nMPI process number %d\n",id);  
+  fprintf(logfile,"OpenMP parallel processing with %d threads\n",omp_get_num_threads());
   
   // all processes need to set up income process, etc.
   // read differential evolution parameters
@@ -262,9 +261,23 @@ int main(int argc, char *argv[])
       return 1;
     }
 
+  if(dim==1)
+    {
+      fprintf(logfile,"Optimizing over labor and wealth taxes. Zero capital income tax and no wealth tax threshold.\n");
+    }
+  else if(dim==2)
+    {
+      fprintf(logfile,"Optimizing over labor tax, wealth tax, and wealth tax threshold. Zero capital income tax.\n");
+
+    }
+    else if(dim==3)
+    {
+      fprintf(logfile,"Optimizing over labor tax, capital incomne tax, wealth tax, and wealth tax threshold.\n");
+    }
+
+
   // number of slave processes
   nslaves = ntasks-1;
-  //if(ntasks > (npop+1))
   if(ntasks != npop)
     {
       printf("You must use exactly %d processes\n",npop);
@@ -302,7 +315,21 @@ int main(int argc, char *argv[])
   
   // start timer
   fprintf(logfile,"Master process starting...\n\n");
-  setup();
+  if(setup())
+    {
+      fprintf(logfile,"Failed to setup model economy!\n")
+      for (j=0; j<nslaves; j++)
+	{
+	  i=0;
+	  tmp[i][0] = HUGE_VAL;
+	  dest_id=j+1;
+	  err = MPI_Send(tmp[i], dim, MPI_DOUBLE, dest_id, tag, MPI_COMM_WORLD);
+	}
+      fprintf(logfile,"Closing master thread %d\n",id);
+      close_log();
+      MPI_Finalize();
+      return 1;
+    }
 
   time_t start, stop;
   time(&start);
@@ -320,7 +347,6 @@ int main(int argc, char *argv[])
 	  err = MPI_Send(tmp[i], dim, MPI_DOUBLE, dest_id, tag, MPI_COMM_WORLD);
 	}
       fprintf(logfile,"Closing master thread %d\n",id);
-      cleanup();
       close_log();
       MPI_Finalize();
       return 1;

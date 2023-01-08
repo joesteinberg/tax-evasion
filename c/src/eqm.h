@@ -107,16 +107,20 @@ typedef struct
 
 }bellman_params;
 
+#ifndef EXTERN2
+#define EXTERN2 extern
+#endif
+
 //double EW[J][NE][NZ][NI][NV][ND][NA];
-gsl_spline ******* spline_V[NTH];
-gsl_interp_accel * acc[NTH];
+EXTERN2 gsl_spline ******* spline_V[NTH];
+EXTERN2 gsl_interp_accel * acc[NTH];
 
-double tmp_Psi[J][NE][NZ][NI][NV][ND][NA];
-double income_cdf_w_shelter_pct[J*NE*NZ*NI*NV*ND*NA][6];
+EXTERN2 double tmp_Psi[J][NE][NZ][NI][NV][ND][NA];
+EXTERN2 double income_cdf_w_shelter_pct[J*NE*NZ*NI*NV*ND*NA][6];
 
-eqm_t * ss0;
-eqm_t * ss1;
-eqm_t * eqm_trans[NT];
+EXTERN2 eqm_t * ss0;
+EXTERN2 eqm_t * ss1;
+EXTERN2 eqm_t * eqm_trans[NT];
 
 //double penalty_frac;
 

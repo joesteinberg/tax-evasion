@@ -1,3 +1,6 @@
+#define EXTERN
+#define EXTERN2
+
 #ifndef __MAIN_C__
 #define __MAIN_C__
 
@@ -71,6 +74,9 @@ void help()
   fprintf(logfile,"\tb=6: Short-run partial equilibrium\n");
   fprintf(logfile,"\tb=7: Small open economy\n");
   fprintf(logfile,"\tb=8: Hidden wealth cannot be collateralized\n");
+  fprintf(logfile,"\tb=16: Higher transfer costs + SR PE\n");
+  fprintf(logfile,"\tb=26: Higher detection rate + SR PE\n");
+  fprintf(logfile,"\tb=36: Higher detection penalty + SR PE\n");
   fprintf(logfile,"\tc: max wealth tax\n");
   fprintf(logfile,"\td: number of reforms\n");
   fprintf(logfile,"\te: clear GBC using labor tax instead of lump-sum transfers\n");
@@ -514,6 +520,7 @@ int main(int argc, char * argv[])
       if(wealth_tax_type>=0 && abar>1.0e-8)
 	calc_wealth_tax_evasion_elast(1,ss1);
       
+
       free_mem();
     }
   //---------------------------------------------------------------------------
@@ -874,7 +881,7 @@ int main(int argc, char * argv[])
 	{
 	  strcpy(suff,"_hi_ec2");
 	  p2e = p2e * 2.0;
-	  p2e = p2n * 2.0;
+	  p2n = p2n * 2.0;
 	  fprintf(logfile,"Higher detection rate\n");
 	}
       else if(NV==12 && strcmp(argv[3],"3")==0)
@@ -903,6 +910,7 @@ int main(int argc, char * argv[])
 	  chi=0.0;
 	  fprintf(logfile,"Hidden wealth cannot be collateralized\n");
 	}
+
 
       else if(strcmp(argv[3],"0")!=0)
 	{
@@ -937,7 +945,7 @@ int main(int argc, char * argv[])
       lump_sum=1;
       public_goods=0;
       benchmark_eqm=0;
-      verbose=0;
+      verbose=1;
 
       double tauk0=tauk;
       double tauk_lo=tauk0 - strtof(argv[4],NULL);
@@ -1026,6 +1034,9 @@ int main(int argc, char * argv[])
   // fprintf(logfile,"\tb=6: Short-run partial equilibrium\n");
   // fprintf(logfile,"\tb=7: Small open economy\n");
   // fprintf(logfile,"\tb=8: Hidden wealth cannot be collateralized"\n);
+  // fprintf(logfile,"\tb=16: Higher transfer costs + SR PE\n");
+  // fprintf(logfile,"\tb=26: Higher detection rate + SR PE\n");
+  // fprintf(logfile,"\tb=36: Higher detection penalty + SR PE\n");
   // fprintf(logfile,"\tc: max wealth tax\n");
   // fprintf(logfile,"\td: number of reforms\n");
   // fprintf(logfile,"\te: clear GBC using labor tax instead of lump-sum transfers\n");
@@ -1112,6 +1123,37 @@ int main(int argc, char * argv[])
 	  strcpy(suff,"_chi0");
 	  fprintf(logfile,"Hidden wealth cannot be collateralized\n");
 	}
+      else if(NV==12 && strcmp(argv[3],"16")==0)
+	{
+	  pe=1;
+	  dist_max_iter=1;
+	  wage_max_iter=1;
+	  strcpy(suff,"_hi_ec1");
+	  eta = eta*1.5;
+	  fprintf(logfile,"Higher transfer cost + SR PE\n");
+	}
+      else if(NV==12 && strcmp(argv[3],"26")==0)
+	{
+	  pe=1;
+	  dist_max_iter=1;
+	  wage_max_iter=1;
+	  strcpy(suff,"_hi_ec2");
+	  p2e = p2e * 2.0;
+	  p2n = p2n * 2.0;
+	  fprintf(logfile,"Higher detection rate + SR PE\n");
+	}
+      else if(NV==12 && strcmp(argv[3],"36")==0)
+	{
+	  pe=1;
+	  dist_max_iter=1;
+	  wage_max_iter=1;
+	  strcpy(suff,"_hi_ec3");
+	  penalty_frac_stock = penalty_frac_stock * 1.5;
+	  penalty_frac_tauk = penalty_frac_tauk * 1.5;
+	  penalty_frac_taua = penalty_frac_taua * 1.5;
+	  fprintf(logfile,"Higher detection penalty + SR PE\n");
+	}
+
 
       else if(strcmp(argv[3],"0")!=0)
 	{
@@ -1141,6 +1183,19 @@ int main(int argc, char * argv[])
       load_bin_eqm_t(ss0,fname0);
       load_bin_eqm_t(ss1,fname0);
 
+      if(strcmp(argv[3],"16")==0)
+	{
+	  strcpy(suff,"_hi_ec1_pe");
+	}
+      else if(strcmp(argv[3],"26")==0)
+	{
+	  strcpy(suff,"_hi_ec2_pe");
+	}
+      else if(strcmp(argv[3],"36")==0)
+	{
+	  strcpy(suff,"_hi_ec3_pe");
+	}
+
       // set up the exercise
       verbose=0;
       taua_clear_gbc=0;
@@ -1165,6 +1220,9 @@ int main(int argc, char * argv[])
       double d = (taua_hi-taua0)/(n_tau-1);      
       for(int n=0; n<n_tau; n++)
 	{
+	  if(pe)
+	    load_bin_eqm_t(ss1,fname0);
+	    
 	  taua=taua0+(n+1)*d;
 	  
 	  linebreak();

@@ -5,7 +5,7 @@ import glob
 import pandas as pd
 import numpy as np
 import scipy.ndimage as nd
-import weighted
+
 import matplotlib as mpl
 mpl.use('Agg')
 mpl.rc('font',**{'family':'serif','serif':['Palatino'],'size':8})
@@ -14,6 +14,7 @@ mpl.rc('text', usetex=True)
 mpl.rc('lines',linewidth=2.0)
 mpl.rc('savefig',bbox='tight')
 mpl.rc('savefig',format='pdf')
+
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -24,8 +25,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 print('Loading aggregate results')
 
-evasion_type = ['evasion','no_evasion','evasion_pe']
-gama=[0.43172371688765909, 0.42913860042472707,0.43172371688765909]
+evasion_type = ['evasion','no_evasion','evasion_pe','no_evasion_pe']
+gama=[0.43172371688765909, 0.42913860042472707,0.43172371688765909,0.42913860042472707]
 sigma=4
 policy = ['warren','sanders']
 
@@ -34,15 +35,15 @@ inpath = '../c/output/'
 results_tauk=[]
 imaxR_tauk = [0,0]
 imaxW_tauk = [0,0]
-tauk0=[0,0,0]
+tauk0=[0,0,0,0]
 
-for (i,s,g) in zip(range(3),evasion_type,gama):
+for (i,s,g) in zip(range(4),evasion_type,gama):
 
     results2=None
-    if(i<2):
-        results2=pd.read_csv(inpath+'ss0_%s.csv'%s)
-    else:
+    if(i==0 or i==2):
         results2=pd.read_csv(inpath+'ss0_evasion.csv')
+    elif(i==1 or i==3):
+        results2=pd.read_csv(inpath+'ss0_no_evasion.csv')
 
     results2.approval0 = np.nan
     tauk0[i]=results2.tauk.values[0]
@@ -54,6 +55,9 @@ for (i,s,g) in zip(range(3),evasion_type,gama):
         csv_files = [f for f in glob.glob(inpath+"ss1_tauk_0.[0-9][0-9][0-9][0-9][0-9][0-9]_no_evasion.csv")]
     elif i==2:
         csv_files = [f for f in glob.glob(inpath+"ss1_tauk_0.[0-9][0-9][0-9][0-9][0-9][0-9]_evasion_pe.csv")]
+    elif i==3:
+        csv_files = [f for f in glob.glob(inpath+"ss1_tauk_0.[0-9][0-9][0-9][0-9][0-9][0-9]_no_evasion_pe.csv")]
+
         
     for f in csv_files:
         results2 = results2.append(pd.read_csv(f),ignore_index=True,sort=False)
@@ -119,13 +123,13 @@ results_taua=[]
 imaxR_taua = [0,0]
 imaxW_taua = [0,0]
 
-for (i,s,g) in zip(range(3),evasion_type,gama):
+for (i,s,g) in zip(range(4),evasion_type,gama):
 
     results2=None
-    if(i<2):
-        results2=pd.read_csv(inpath+'ss0_%s.csv'%s)
-    else:
+    if(i==0 or i==2):
         results2=pd.read_csv(inpath+'ss0_evasion.csv')
+    elif(i==1 or i==3):
+        results2=pd.read_csv(inpath+'ss0_no_evasion.csv')
 
     results2.approval0 = np.nan    
     csv_files=[]
@@ -135,6 +139,8 @@ for (i,s,g) in zip(range(3),evasion_type,gama):
         csv_files = [f for f in glob.glob(inpath+"ss1_taua_0.[0-9][0-9][0-9][0-9][0-9][0-9]_no_evasion.csv")]
     elif i==2:
         csv_files = [f for f in glob.glob(inpath+"ss1_taua_0.[0-9][0-9][0-9][0-9][0-9][0-9]_evasion_pe.csv")]
+    elif i==3:
+        csv_files = [f for f in glob.glob(inpath+"ss1_taua_0.[0-9][0-9][0-9][0-9][0-9][0-9]_no_evasion_pe.csv")]
         
     for f in csv_files:
         results2 = results2.append(pd.read_csv(f),ignore_index=True,sort=False)
@@ -601,12 +607,95 @@ file.close()
     
 ######################################################
 
+results_taua[3] = results_taua[3].drop(4,axis=0).reset_index(drop=True)
+
 print('Evasion elasticities:')
 print('\tCapital income:')
 print('\t\tEvasion SR: [%0.3f,%0.3f]' % (results_tauk[2].tauk_elast.min(),results_tauk[2].tauk_elast.max()))
 print('\t\tEvasion LR: [%0.3f,%0.3f]' % (results_tauk[0].tauk_elast.min(),results_tauk[0].tauk_elast.max()))
-print('\t\tNo evasion: [%0.3f,%0.3f]' % (results_tauk[1].tauk_elast.min(),results_tauk[1].tauk_elast.max()))
+#print('\t\tNo evasion SR: [%0.3f,%0.3f]' % (results_tauk[3].tauk_elast.min(),results_tauk[3].tauk_elast.max()))
+print('\t\tNo evasion LR: [%0.3f,%0.3f]' % (results_tauk[1].tauk_elast.min(),results_tauk[1].tauk_elast.max()))
 print('\tWealth:')
-print('\t\tEvasion SR: [%0.3f,%0.3f]' % (results_taua[2].taua_elast.min(),results_taua[2].taua_elast.max()))
+print('\t\tEvasion SR total: [%0.3f,%0.3f]' % ( (results_taua[2].taua_elast).min(),(results_taua[2].taua_elast).max()))
+print('\t\tEvasion SR evasion: [%0.3f,%0.3f]' % ( (results_taua[2].taua_elast-results_taua[3].taua_elast).min(),(results_taua[2].taua_elast-results_taua[3].taua_elast).max()))
 print('\t\tEvasion LR: [%0.3f,%0.3f]' % (results_taua[0].taua_elast.min(),results_taua[0].taua_elast.max()))
-print('\t\tNo evasion: [%0.3f,%0.3f]' % (results_taua[1].taua_elast.min(),results_taua[1].taua_elast.max()))
+print('\t\tNo evasion SR: [%0.3f,%0.3f]' % (results_taua[3].taua_elast.min(),results_taua[3].taua_elast.max()))
+print('\t\tNo evasion LR: [%0.3f,%0.3f]' % (results_taua[1].taua_elast.min(),results_taua[1].taua_elast.max()))
+
+
+# -----------------------------------
+# -----------------------------------
+# -----------------------------------
+# extras
+
+########################################################
+
+colors = ['#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00','#ffff33']
+dashes = [(None,None),(6,1),(2,1),(1,0.5)]
+
+fig,axes=plt.subplots(1,2,figsize=(6.5,3),sharex=False,sharey=False)
+
+axes[0].plot(results_tauk[0]['tauk'],results_tauk[0]['tauk_elast'],color=colors[0],dashes=dashes[0],label='Baseline (long run)',linewidth=1.5,alpha=0.8)
+axes[0].plot(results_tauk[1]['tauk'],results_tauk[1]['tauk_elast'],color=colors[1],dashes=dashes[1],label='No evasion (long run)',linewidth=1.5,alpha=0.8)
+axes[0].plot(results_tauk[2]['tauk'],results_tauk[2]['tauk_elast'],color=colors[2],dashes=dashes[2],label='Baseline (short run)',linewidth=1.5,alpha=0.8)
+
+axes[0].set_xlabel('Capital income tax (p.p. chg.)')
+axes[0].set_title('(a) Reported capital income',y=1.0,size=8)
+axes[0].set_xlim(-15,45)
+
+axes[1].plot(results_taua[0]['taua'],results_taua[0]['taua_elast'],color=colors[0],dashes=dashes[0],label='Baseline (long run)',linewidth=1.5,alpha=0.8)
+axes[1].plot(results_taua[1]['taua'],results_taua[1]['taua_elast'],color=colors[1],dashes=dashes[1],label='No evasion (long run)',linewidth=1.5,alpha=0.8)
+
+x=results_taua[2]['taua']
+y1=results_taua[2]['taua_elast']
+y2=results_taua[3]['taua_elast']
+axes[1].plot(x,y1-y2,color=colors[2],dashes=dashes[2],label='Baseline (short run)',linewidth=1.5,alpha=0.8)
+#axes[1].plot(results_taua[3]['taua'],results_taua[3]['taua_elast'],color=colors[3],dashes=dashes[3],label='No evasion (short run)',linewidth=1.5,alpha=0.8)
+axes[1].set_xlabel('Wealth tax (\%)')
+axes[1].set_title('(b) Reported wealth',y=1.0,size=8)
+axes[1].set_xlim(results_taua[3].taua[1],6)
+
+axes[1].legend(loc='upper right',prop={'size':6})
+fig.subplots_adjust(hspace=0.2,wspace=0.15)
+plt.savefig('output/fig/evasion_elast.pdf',bbox='tight')
+
+plt.close('all')
+
+########################################################
+c='lump_sum'
+
+mpl.rc('font',**{'family':'serif','serif':['Palatino'],'size':10})
+mpl.rc('font',size=18)
+mpl.rc('text', usetex=True)
+mpl.rc('lines',linewidth=3.0)
+mpl.rc('savefig',bbox='tight')
+mpl.rc('savefig',format='png')
+
+fig,axes=plt.subplots(1,2,figsize=(11,5),sharex=False,sharey=True)
+        
+axes[0].axvline(0,color='black',linewidth=1,linestyle='-',alpha=0.6)
+axes[0].axhline(0,color='black',linewidth=1,linestyle='-',alpha=0.6)      
+axes[0].plot(results_tauk[0]['tauk'],results_tauk[0][c],color=colors[0],dashes=dashes[0],label='With evasion',linewidth=3,alpha=0.8)
+axes[0].plot(results_tauk[1]['tauk'],results_tauk[1][c],color=colors[1],dashes=dashes[1],label='Ignoring evasion',linewidth=3,alpha=0.8)
+axes[0].set_xlabel(r'Change in tax rate (p.p.)')
+axes[0].set_ylabel(r'Change in tax revenues (pct. GDP)')
+axes[0].set_title(r'(a) Capital income tax reform',y=1.025)
+axes[0].set_xticks([-15,0,15,30,45])
+axes[0].set_xlim(-15,45)
+
+axes[1].axvline(0,color='black',linewidth=1,linestyle='-',alpha=0.6)
+axes[1].axhline(0,color='black',linewidth=1,linestyle='-',alpha=0.6)      
+axes[1].plot(results_taua[0]['taua'],results_taua[0][c],color=colors[0],dashes=dashes[0],label='With evasion',linewidth=3,alpha=0.8)
+axes[1].plot(results_taua[1]['taua'],results_taua[1][c],color=colors[1],dashes=dashes[1],label='Ignoring evasion',linewidth=3,alpha=0.8)
+axes[1].set_xlabel(r'Tax rate (p.p. chg.)')
+axes[1].set_title(r'(b) Introducing a wealth tax',y=1.025)
+#axes[0].set_ylabel(r'Lump-sum transfer (pct. avg. labor income)')
+axes[1].set_xlim(0,8)
+axes[1].set_xticks(range(9))
+
+axes[0].legend(loc='lower right',fontsize=14)
+
+fig.subplots_adjust(hspace=0.2,wspace=0.15)
+plt.savefig('output/fig/webfig_evasion.png',bbox='tight',dpi=300)
+
+plt.close('all')

@@ -1,0 +1,15 @@
+CC = gcc
+CFLAGS = -Wall -pedantic -fopenmp -mcmodel=medium -DHAVE_INLINE=1 -ffast-math -g -O3
+LDFLAGS = -lgsl -lcblas -lm -ldl -lgomp -DHAVE_INLINE=1 -ffast-math -g -O3
+
+EXDIR = bin
+ODIR = src/obj
+
+_OBJ = calibration.o eqm_2type.o main_2type.o
+OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+
+$(ODIR)/%.o: src/%.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+model_2type: $(OBJ)
+	$(CC) -o $(EXDIR)/$@ $^ $(CFLAGS) $(LDFLAGS)

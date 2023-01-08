@@ -21,9 +21,12 @@ easy to read.
 void help()
 {
   printf("\nUsage: diff_evo_mpi <x> <y>\n");
-  printf("\t\tx=0: No evasion\n");
-  printf("\t\tx=1: Evasion\n");
-  printf("\t\ty: sensitivity analysis (0,1,2,3,4)\n");
+  printf("\t\tx=0: Evasion elasticity = 0.0 (no evasion)\n");
+  printf("\t\tx=1: Evasion elasticity = 0.5\n");
+  printf("\t\tx=2: Evasion elasticity = 2.5\n");
+  printf("\t\tx=3: Evasion elasticity = 7.5\n");
+  printf("\t\ty=0: Start with fresh population\n");
+  printf("\t\ty=1: Restart population from saved output from previous run\n");
 }
 
 int fcmp (const double x1, const double x2, const double epsilon)
@@ -132,7 +135,7 @@ int read_input_file
     }
   if(fscanf(infile,"%d",dim) != 1)
     {
-        printf("\nError reading dim!\n");
+      printf("\nError reading dim!\n");
       fclose(infile);
       return 1;
     }
@@ -144,7 +147,7 @@ int read_input_file
     }
   if(fscanf(infile,"%lf",F) != 1)
     {
-    printf("\nError reading F!\n");
+      printf("\nError reading F!\n");
       fclose(infile);
       return 1;
     }
@@ -165,6 +168,12 @@ int read_input_file
   if(*dim<=0)
     {
       printf("\nError in input file! dim = %d, should be positive\n",*dim);
+      fclose(infile);
+      return 1;
+    }
+  if(dim>3)
+    {
+      printf("\nError in input file! dim = %d, should be 1, 2, or 3\n",*dim);
       fclose(infile);
       return 1;
     }
